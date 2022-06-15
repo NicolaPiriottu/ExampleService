@@ -94,7 +94,12 @@ class SpeedFragment : Fragment() {
                     )
                 }
                 SpeedService.INTENT_CHECK_GPS -> {
-                    viewModel.goToNoGpsFragment()
+                    viewModel.goToNoGpsFragment(
+                        intent.getBooleanExtra(
+                            SpeedService.CHECK_GPS,
+                            false
+                        )
+                    )
                 }
                 SpeedService.INTENT_SET_CURRENT_POSITION -> {
 
@@ -151,6 +156,11 @@ class SpeedFragment : Fragment() {
         return binding.root
     }
 
+    override fun onResume() {
+        super.onResume()
+        updateTextBtn(isStartService)
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         //stop Broadcast receiver
@@ -160,7 +170,6 @@ class SpeedFragment : Fragment() {
             e.printStackTrace()
         }
     }
-
 
     private fun setupView() {
         binding.fragmentStartStopBtn.setOnClickListener {
@@ -186,6 +195,7 @@ class SpeedFragment : Fragment() {
                 when (useCase) {
                     is MainViewModel.UseCaseLiveData.ShowSpeed -> {
                         binding.fragmentSpeedTv.text = useCase.speed
+                        isStartService = true
                     }
                     is MainViewModel.UseCaseLiveData.IsRunService -> {
 
@@ -202,7 +212,10 @@ class SpeedFragment : Fragment() {
                     }
 
                     is MainViewModel.UseCaseLiveData.GoToNoGpsFragment -> {
-                        findNavController().navigate(SpeedFragmentDirections.toNoGpsFragment())
+                        if (!useCase.isGps) {
+                            findNavController().navigate(SpeedFragmentDirections.toNoGpsFragment())
+                        }
+                        isStartService = false
                     }
                 }
             }
@@ -275,5 +288,16 @@ class SpeedFragment : Fragment() {
                 })
         // Create the AlertDialog object and return it
         builder.create().show()
+    }
+
+    private fun updateTextBtn(isStart: Boolean) {
+        binding.fragmentStartStopBtn.setText(
+
+            if (!isStart) {
+                R.string.speed_start_button_fragment
+            } else {
+                R.string.speed_stop_button_fragment
+            }
+        )
     }
 }

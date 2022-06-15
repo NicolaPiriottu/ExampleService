@@ -15,7 +15,7 @@ class MainViewModel : ViewModel() {
     sealed class UseCaseLiveData {
         data class ShowSpeed(val speed: String) : UseCaseLiveData()
         data class IsRunService(val isRunService: Boolean) : UseCaseLiveData()
-        object GoToNoGpsFragment : UseCaseLiveData()
+        data class GoToNoGpsFragment(val isGps: Boolean) : UseCaseLiveData()
     }
 
     //region LiveData
@@ -38,9 +38,9 @@ class MainViewModel : ViewModel() {
             Event(UseCaseLiveData.IsRunService(isRunService))
     }
 
-    fun goToNoGpsFragment() {
+    fun goToNoGpsFragment(isGPS: Boolean) {
         useCaseLiveData.value =
-            Event(UseCaseLiveData.GoToNoGpsFragment)
+            Event(UseCaseLiveData.GoToNoGpsFragment(isGPS))
     }
 
 }

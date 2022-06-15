@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.BitmapFactory
+import android.location.Location
 import android.location.LocationManager
 import android.os.*
 import android.util.Log
@@ -16,6 +17,7 @@ import androidx.core.app.NotificationManagerCompat
 import com.example.exampleservice.MainActivity
 import com.example.exampleservice.broadcastreceivers.CheckGPS
 import com.google.android.gms.location.*
+import com.google.android.gms.tasks.Task
 import kotlin.math.roundToInt
 
 /**
@@ -61,6 +63,7 @@ class SpeedService : Service() {
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
 
     private var actualSpeed: Int = 0
+    private val handlerCheckGPS = Handler(Looper.getMainLooper())
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
@@ -89,7 +92,6 @@ class SpeedService : Service() {
         locationRequest.interval = 4000
         locationRequest.fastestInterval = 2000
         locationRequest.priority = Priority.PRIORITY_HIGH_ACCURACY
-
 
         showPushNotification(
             "Notification Service",
@@ -150,7 +152,6 @@ class SpeedService : Service() {
             locationCallback,
             Looper.getMainLooper()
         )
-
         //Send start service
         sendStateService(true)
     }
@@ -176,6 +177,18 @@ class SpeedService : Service() {
                 // Post notification
                 baseContext.sendBroadcast(intent)
             }
+        }
+        //No GPS
+        override fun onLocationAvailability(p0: LocationAvailability) {
+            super.onLocationAvailability(p0)
+            //Send broadcast check GPS
+            sendCheckGPS(false)
+            showPushNotification(
+                "Notification Service",
+                "Service started but GPS is Off!",
+                4000
+            )
+            Log.d("Niko", "Service onLocationResult onLocationAvailability $p0")
         }
     }
 
