@@ -8,7 +8,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.BitmapFactory
-import android.location.Location
 import android.location.LocationManager
 import android.os.*
 import android.util.Log
@@ -17,14 +16,12 @@ import androidx.core.app.NotificationManagerCompat
 import com.example.exampleservice.MainActivity
 import com.example.exampleservice.broadcastreceivers.CheckGPS
 import com.google.android.gms.location.*
-import com.google.android.gms.tasks.Task
 import kotlin.math.roundToInt
 
 /**
  * Created by Nicola Luigi Piriottu on 13/06/22.
  */
 class SpeedService : Service() {
-
 
     //https://medium.com/koahealth/building-an-android-service-that-never-stops-running-5868f304724b
 
@@ -63,7 +60,6 @@ class SpeedService : Service() {
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
 
     private var actualSpeed: Int = 0
-    private val handlerCheckGPS = Handler(Looper.getMainLooper())
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
@@ -101,13 +97,11 @@ class SpeedService : Service() {
 
         broadcastGps = CheckGPS(object : CheckGPS.LocationCallBack {
             override fun gpsOn() {
-                Log.d("Niko", "Service onCreate  stato GPS = gpsOn")
                 //Send broadcast check GPS
                 sendCheckGPS(true)
             }
 
             override fun gpsOff() {
-                Log.d("Niko", "Service onCreate  stato GPS = gpsOff")
                 //Send broadcast check GPS
                 sendCheckGPS(false)
 
@@ -118,9 +112,7 @@ class SpeedService : Service() {
                 )
             }
 
-            override fun error() {
-                Log.d("Niko", "Service onCreate errore stato GPS")
-            }
+            override fun error() {}
 
         })
 
@@ -183,12 +175,12 @@ class SpeedService : Service() {
             super.onLocationAvailability(p0)
             //Send broadcast check GPS
             sendCheckGPS(false)
+
             showPushNotification(
                 "Notification Service",
                 "Service started but GPS is Off!",
                 4000
             )
-            Log.d("Niko", "Service onLocationResult onLocationAvailability $p0")
         }
     }
 
@@ -203,12 +195,9 @@ class SpeedService : Service() {
             }
             stopForeground(true)
             stopSelf()
-        } catch (e: Exception) {
-            Log.d("niKO", "Service : ERRORE dentro stopLocationUpdates = ${e.message}")
-        }
+        } catch (e: Exception) { }
 
         fusedLocationProviderClient.removeLocationUpdates(locationCallback)
-
 
         try {
             baseContext.unregisterReceiver(broadcastGps)
@@ -216,8 +205,6 @@ class SpeedService : Service() {
         } catch (e: IllegalArgumentException) {
             e.printStackTrace()
         }
-
-        Log.d("Niko", "Service stopLocationUpdates")
 
         //Send stop service
         sendStateService(false)

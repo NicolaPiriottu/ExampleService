@@ -8,8 +8,6 @@ import android.location.Location
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -48,7 +46,6 @@ class SpeedFragment : Fragment() {
         when {
             permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
                 // Precise location access granted.
-                Log.d("Niko", "Ti trovi nel primo controllo ACCESS_FINE_LOCATION")
 
                 //Check background permission
                 setOnStartService(
@@ -60,7 +57,7 @@ class SpeedFragment : Fragment() {
             }
             permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
                 // Only approximate location access granted.
-                Log.d("Niko", "Ti trovi nel secondo controllo ACCESS_COARSE_LOCATION")
+
                 //Check background permission
                 setOnStartService(
                     permissions.getOrDefault(
@@ -71,7 +68,6 @@ class SpeedFragment : Fragment() {
             }
             else -> {
                 // No location access granted.
-                Log.d("Niko", "Non hai i permessi")
                 showDialog()
             }
         }
@@ -123,7 +119,6 @@ class SpeedFragment : Fragment() {
             ) == PackageManager.PERMISSION_GRANTED
         ) {
             // Precise location access granted.
-            Log.d("Niko", "Ti trovi ad aver accettato i permessi ad avvio app")
 
             //start Service receiver
             configureReceiver()
@@ -137,8 +132,7 @@ class SpeedFragment : Fragment() {
             )
 
         } else {
-            //POrta il bottone in stato di attivazione ( o cambia fragment)
-            //goToSettings()
+            updateTextBtn(isStartService)
         }
     }
 
@@ -254,10 +248,10 @@ class SpeedFragment : Fragment() {
 
     private fun setOnStartService(isBackgroundPermission: Boolean) {
         if (isBackgroundPermission) {
-            Log.d("Niko", "hai accesso al background")
+            //Allow all the time : selected
             setOnService(SpeedService.ActionsType.START)
         } else {
-            Log.d("Niko", " NON hai accesso al background")
+            //Allow all the time : no selected
             showDialog()
         }
     }
@@ -267,7 +261,6 @@ class SpeedFragment : Fragment() {
     }
 
     private fun goToSettings() {
-        //Richiede i permessi
         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
         val uri: Uri =
             Uri.fromParts("package", activity?.packageName, null)
